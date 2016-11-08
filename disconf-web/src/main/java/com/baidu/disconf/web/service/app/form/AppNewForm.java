@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class AppNewForm extends RequestFormBase {
 
-    /**
+	/**
      *
      */
     private static final long serialVersionUID = 4329463343279659715L;
@@ -31,5 +31,31 @@ public class AppNewForm extends RequestFormBase {
 
     // 邮箱
     private String emails = "";
+
+	public String getApp() {
+		return app;
+	}
+
+	public void setApp(String app) {
+		this.app = app;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public String getEmails() {
+		return emails;
+	}
+
+	public void setEmails(String emails) {
+		this.emails = emails;
+	}
+    
+    
 
 }
