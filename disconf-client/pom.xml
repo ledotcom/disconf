@@ -333,5 +333,18 @@
             </build>
         </profile>
     </profiles>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>letv-mall-snapshot</id>
+			<name>letv mall Snapshot</name>
+			<url>http://maven.letv.cn/nexus/content/repositories/lemall-Snapshot/</url>
+		</snapshotRepository>
+		<repository>
+			<id>letv-mall-release</id>
+			<name>letv mall Release</name>
+			<url>http://maven.letv.cn/nexus/content/repositories/lemall-Release/</url>
+		</repository>
+	</distributionManagement>
 
 </project>

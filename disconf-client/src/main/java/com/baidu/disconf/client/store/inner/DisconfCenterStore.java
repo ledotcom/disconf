@@ -94,7 +94,7 @@ public class DisconfCenterStore {
 
         if (confItemMap.containsKey(key)) {
 
-            LOGGER.error("There are two same item key!!!! " + "first: " + confItemMap.get(key).getClass().toString() +
+            LOGGER.error("There are two same item key!!!! " + "key:"+key+",first: " + confItemMap.get(key).getClass().toString() +
                     ", Second: " + disconfCenterItem.getClass().toString());
         } else {
             confItemMap.put(key, disconfCenterItem);

@@ -29,4 +29,11 @@ public class SignUtils {
         String data = DigestUtils.shaHex(uuid + phone);
         return data;
     }
+    
+    public static void main(String[] args) {
+    	String userID = "testUser1";
+    	String passwordString = "111111";
+		System.out.println(createPassword(passwordString));
+		System.out.println(createToken(userID));
+	}
 }

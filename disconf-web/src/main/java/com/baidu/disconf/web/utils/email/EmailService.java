@@ -43,4 +43,22 @@ public class EmailService {
         // 这个类主要来发送邮件
         return SimpleMailSender.sendHtmlMail(mailInfo);// 发送文体格式
     }
+    
+    public static void main(String[] args) {
+    	MailSenderInfo mailInfo = new MailSenderInfo();
+        mailInfo.setMailServerHost("10.205.91.22");
+        mailInfo.setMailServerPort("25");
+        mailInfo.setValidate(true);
+        mailInfo.setUserName("lemall_fecru");
+        mailInfo.setPassword("@!m09182016");// 您的邮箱密码
+
+        mailInfo.setFromAddress("lemall_fecru@le.com");
+        mailInfo.setToAddress("dimmacro@163.com");
+
+        mailInfo.setSubject("aaa");
+        mailInfo.setContent("1111");
+
+        // 这个类主要来发送邮件
+        SimpleMailSender.sendHtmlMail(mailInfo);// 发送文体格式
+	}
 }
