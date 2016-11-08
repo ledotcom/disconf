@@ -19,10 +19,29 @@ public class RegisterForm extends RequestFormBase {
     @NotEmpty(message = "name.empty")
     private String name;
 
-    /**
+
+	/**
      * 密码
      */
     @NotEmpty(message = "password.empty")
     @NotNull(message = "password.empty")
     private String password;
+    
+    
+    public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }
