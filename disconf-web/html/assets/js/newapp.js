@@ -27,7 +27,7 @@ $("#item_submit").on("click", function (e) {
     }).done(function (data) {
         $("#error").removeClass("hide");
         if (data.success === "true") {
-            $("#error").html(data.result);
+            $("#error").html(data.result).show();
         } else {
             Util.input.whiteError($("#error"), data);
         }

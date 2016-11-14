@@ -41,25 +41,29 @@ public class MailBean implements InitializingBean {
      */
     public void sendHtmlMail(String from, String[] to, String title, String text)
             throws AddressException, MessagingException {
+    	try {
+    		 long start = System.currentTimeMillis();
 
-        long start = System.currentTimeMillis();
+    	        MimeMessage mimeMessage = mailSender.createMimeMessage();
+    	        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "GBK");
 
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "GBK");
+    	        InternetAddress[] toArray = new InternetAddress[to.length];
+    	        for (int i = 0; i < to.length; i++) {
+    	            toArray[i] = new InternetAddress(to[i]);
+    	        }
 
-        InternetAddress[] toArray = new InternetAddress[to.length];
-        for (int i = 0; i < to.length; i++) {
-            toArray[i] = new InternetAddress(to[i]);
-        }
-
-        messageHelper.setFrom(new InternetAddress(from));
-        messageHelper.setTo(toArray);
-        messageHelper.setSubject(title);
-        messageHelper.setText(text, true);
-        mimeMessage = messageHelper.getMimeMessage();
-        mailSender.send(mimeMessage);
-        long end = System.currentTimeMillis();
-        LOG.info("send mail start:" + start + " end :" + end);
+    	        messageHelper.setFrom(new InternetAddress(from));
+    	        messageHelper.setTo(toArray);
+    	        messageHelper.setSubject(title);
+    	        messageHelper.setText(text, true);
+    	        mimeMessage = messageHelper.getMimeMessage();
+    	        mailSender.send(mimeMessage);
+    	        long end = System.currentTimeMillis();
+    	        LOG.info("send mail start:" + start + " end :" + end);
+		} catch (Exception e) {
+			LOG.error("发现邮件失败:from "+from+",to "+StringUtils.join(to, ";"),e);
+		}
+       
     }
 
     /**

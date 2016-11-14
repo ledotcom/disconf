@@ -14,6 +14,9 @@ import com.baidu.disconf.web.service.config.bo.Config;
 import com.baidu.disconf.web.service.config.dao.ConfigDao;
 import com.baidu.disconf.web.service.config.service.ConfigFetchMgr;
 import com.baidu.disconf.web.service.config.utils.ConfigUtils;
+import com.baidu.disconf.web.service.config.utils.DataSecurityUtil;
+import com.baidu.disconf.web.service.user.bo.UserEnum;
+import com.baidu.disconf.web.utils.CodeUtils;
 
 /**
  * @author knightliao
@@ -30,24 +33,31 @@ public class ConfigFetchMgrImpl implements ConfigFetchMgr {
      * 根据详细参数获取配置
      */
     @Override
-    public Config getConfByParameter(Long appId, Long envId, String version, String key,
+    public Config getConfByParameter(Long appId, Long envId, Long userId,String version, String key,
                                      DisConfigTypeEnum disConfigTypeEnum) {
-
-        return configDao.getByParameter(appId, envId, version, key, disConfigTypeEnum);
+    	if(UserEnum.isAdmin(userId)){
+        	return configDao.getByParameter(appId, envId, version, key, disConfigTypeEnum);
+        }else {
+        	return configDao.getByParameter(appId, envId, userId,version, key, disConfigTypeEnum);
+		}
     }
-
+    
     /**
      * 根据详细参数获取配置返回
      */
-    public ValueVo getConfItemByParameter(Long appId, Long envId, String version, String key) {
-
-        Config config = configDao.getByParameter(appId, envId, version, key, DisConfigTypeEnum.ITEM);
+    public ValueVo getConfItemByParameter(Long appId, Long envId, Long userId,String version, String key) {
+    	Config config;
+    	if(UserEnum.isAdmin(userId)){
+    		config = configDao.getByParameter(appId, envId, version, key, DisConfigTypeEnum.ITEM);
+    	}else{
+    		config = configDao.getByParameter(appId, envId, userId,version, key, DisConfigTypeEnum.ITEM);
+    	}
         if (config == null) {
             return ConfigUtils.getErrorVo("cannot find this config");
         }
 
         ValueVo valueVo = new ValueVo();
-        valueVo.setValue(config.getValue());
+        valueVo.setValue(CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
         valueVo.setStatus(Constants.OK);
 
         return valueVo;
@@ -56,8 +66,8 @@ public class ConfigFetchMgrImpl implements ConfigFetchMgr {
     /**
      * 根据详细参数获取配置列表返回
      */
-    public List<Config> getConfListByParameter(Long appId, Long envId, String version, Boolean hasValue) {
-        return configDao.getConfigList(appId, envId, version, hasValue);
+    public List<Config> getConfListByParameter(Long appId, Long envId, Long userId,String version, Boolean hasValue) {
+        return configDao.getConfigList(appId, envId, userId,version, hasValue);
     }
 
 }

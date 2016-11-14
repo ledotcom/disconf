@@ -16,20 +16,28 @@ import lombok.Data;
 @Data
 public class JsonObject extends JsonObjectBase {
 
-    /**
+	/**
      *
      */
-    private static final long serialVersionUID = -7115209443980058705L;
+	private static final long serialVersionUID = -7115209443980058705L;
 
-    private Map<String, Object> result = new HashMap<String, Object>();
+	private Map<String, Object> result = new HashMap<String, Object>();
 
-    public JsonObject() {
-        super();
-        success = FrontEndInterfaceConstant.RETURN_OK;
-    }
+	public JsonObject() {
+		super();
+		success = FrontEndInterfaceConstant.RETURN_OK;
+	}
 
-    public void addData(String key, Object value) {
-        result.put(key, value);
-    }
+	public void addData(String key, Object value) {
+		result.put(key, value);
+	}
+
+	public Map<String, Object> getResult() {
+		return this.result;
+	}
+
+	public void setResult(Map<String, Object> result) {
+		this.result = result;
+	}
 
 }

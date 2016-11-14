@@ -398,6 +398,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+				          <compilerArguments><bootclasspath>${java.home}/lib/rt.jar:${java.home}/lib/jce.jar</bootclasspath></compilerArguments>
+				        </configuration>
                     </plugin>
 
                     <plugin>

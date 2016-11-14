@@ -1,6 +1,7 @@
 package com.baidu.disconf.web.service.config.service.impl;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,10 +32,14 @@ import com.baidu.disconf.web.service.config.form.ConfListForm;
 import com.baidu.disconf.web.service.config.form.ConfNewItemForm;
 import com.baidu.disconf.web.service.config.service.ConfigHistoryMgr;
 import com.baidu.disconf.web.service.config.service.ConfigMgr;
+import com.baidu.disconf.web.service.config.utils.DataSecurityUtil;
 import com.baidu.disconf.web.service.config.vo.ConfListVo;
 import com.baidu.disconf.web.service.config.vo.MachineListVo;
 import com.baidu.disconf.web.service.env.bo.Env;
+import com.baidu.disconf.web.service.env.bo.EnvEnum;
 import com.baidu.disconf.web.service.env.service.EnvMgr;
+import com.baidu.disconf.web.service.user.bo.UserEnum;
+import com.baidu.disconf.web.service.user.dto.Visitor;
 import com.baidu.disconf.web.service.zookeeper.dto.ZkDisconfData;
 import com.baidu.disconf.web.service.zookeeper.dto.ZkDisconfData.ZkDisconfDataItem;
 import com.baidu.disconf.web.service.zookeeper.service.ZkDeployMgr;
@@ -42,9 +47,11 @@ import com.baidu.disconf.web.utils.CodeUtils;
 import com.baidu.disconf.web.utils.DiffUtils;
 import com.baidu.disconf.web.utils.MyStringUtils;
 import com.baidu.dsp.common.constant.DataFormatConstants;
+import com.baidu.dsp.common.exception.AccessDeniedException;
 import com.baidu.dsp.common.utils.DataTransfer;
 import com.baidu.dsp.common.utils.ServiceUtil;
 import com.baidu.dsp.common.utils.email.LogMailBean;
+import com.baidu.ub.common.commons.ThreadContext;
 import com.baidu.ub.common.db.DaoPageResult;
 import com.github.knightliao.apollo.utils.data.GsonUtils;
 import com.github.knightliao.apollo.utils.io.OsUtil;
@@ -113,7 +120,7 @@ public class ConfigMgrImpl implements ConfigMgr {
     public List<File> getDisconfFileList(ConfListForm confListForm) {
 
         List<Config> configList =
-                configDao.getConfigList(confListForm.getAppId(), confListForm.getEnvId(), confListForm.getVersion(),true);
+                configDao.getConfigList(confListForm.getAppId(), confListForm.getEnvId(), confListForm.getUserId(), confListForm.getVersion(),true);
 
         // 时间作为当前文件夹
         String curTime = DateUtils.format(new Date(), DataFormatConstants.COMMON_TIME_FORMAT);
@@ -121,25 +128,51 @@ public class ConfigMgrImpl implements ConfigMgr {
         OsUtil.makeDirs(curTime);
 
         List<File> files = new ArrayList<File>();
+        
+        // 增加导入item项目，Dimmacro
+        Properties itemProperties = new Properties();
         for (Config config : configList) {
 
             if (config.getType().equals(DisConfigTypeEnum.FILE.getType())) {
 
                 File file = new File(curTime, config.getName());
                 try {
-                    FileUtils.writeByteArrayToFile(file, config.getValue().getBytes());
+                    FileUtils.writeByteArrayToFile(file, CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())).getBytes());
                 } catch (IOException e) {
                     LOG.warn(e.toString());
                 }
 
                 files.add(file);
-            }
+            }else {
+				itemProperties.setProperty(config.getName(), CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
+			}
+        }
+        if(!itemProperties.isEmpty()){
+        	try {
+        		File itemFile = new File(curTime,getAvailableItemFileName("allItemConfig",1,files));
+        		FileWriter itemFileWriter = new FileWriter(itemFile, false);
+        		itemProperties.store(itemFileWriter, "all item information");
+        		itemFileWriter.flush();
+        		itemFileWriter.close();
+        		files.add(itemFile);
+			} catch (Exception e) {
+				 LOG.warn(e.toString());
+			}
         }
 
         return files;
     }
 
-    /**
+    private String getAvailableItemFileName(String allItemFileName,int index,List<File> files) {
+		for(File file :files){
+			if(allItemFileName.equalsIgnoreCase(file.getName())){
+				return getAvailableItemFileName(allItemFileName+index,++index,files);
+			}
+		}
+		return allItemFileName+".properties";
+	}
+
+	/**
      * 配置列表
      */
     @Override
@@ -149,7 +182,7 @@ public class ConfigMgrImpl implements ConfigMgr {
         //
         // 数据据结果
         //
-        DaoPageResult<Config> configList = configDao.getConfigList(confListForm.getAppId(), confListForm.getEnvId(),
+        DaoPageResult<Config> configList = configDao.getConfigList(confListForm.getAppId(), confListForm.getEnvId(),confListForm.getUserId(),
                 confListForm.getVersion(),
                 confListForm.getPage());
 
@@ -208,11 +241,13 @@ public class ConfigMgrImpl implements ConfigMgr {
     private MachineListVo getZkData(List<ZkDisconfDataItem> datalist, Config config) {
 
         int errorNum = 0;
+        // 解密config value的原文以便进行比较
+        String configValue = CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue()));
         for (ZkDisconfDataItem zkDisconfDataItem : datalist) {
 
             if (config.getType().equals(DisConfigTypeEnum.FILE.getType())) {
 
-                List<String> errorKeyList = compareConfig(zkDisconfDataItem.getValue(), config.getValue());
+                List<String> errorKeyList = compareConfig(zkDisconfDataItem.getValue(), configValue);
 
                 if (errorKeyList.size() != 0) {
                     zkDisconfDataItem.setErrorList(errorKeyList);
@@ -224,11 +259,11 @@ public class ConfigMgrImpl implements ConfigMgr {
                 // 配置项
                 //
 
-                if (zkDisconfDataItem.getValue().trim().equals(config.getValue().trim())) {
+                if (zkDisconfDataItem.getValue().trim().equals(configValue.trim())) {
 
                 } else {
                     List<String> errorKeyList = new ArrayList<String>();
-                    errorKeyList.add(config.getValue().trim());
+                    errorKeyList.add(configValue.trim());
                     zkDisconfDataItem.setErrorList(errorKeyList);
                     errorNum++;
                 }
@@ -263,7 +298,7 @@ public class ConfigMgrImpl implements ConfigMgr {
         confListVo.setModifyTime(config.getUpdateTime().substring(0, 12));
         confListVo.setKey(config.getName());
         // StringEscapeUtils.escapeHtml escape
-        confListVo.setValue(CodeUtils.unicodeToUtf8(config.getValue()));
+        confListVo.setValue(CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
         confListVo.setVersion(config.getVersion());
         confListVo.setType(DisConfigTypeEnum.getByType(config.getType()).getModelName());
         confListVo.setTypeId(config.getType());
@@ -415,9 +450,10 @@ public class ConfigMgrImpl implements ConfigMgr {
 
         //
         // 配置数据库的值 encode to db
-        //
-        configDao.updateValue(configId, CodeUtils.utf8ToUnicode(value));
-        configHistoryMgr.createOne(configId, oldValue, CodeUtils.utf8ToUnicode(value));
+        // 修改更新值存为加密串 Dimmacro
+        String encyptStr = DataSecurityUtil.encryptAES(CodeUtils.utf8ToUnicode(value));
+        configDao.updateValue(configId, encyptStr);
+        configHistoryMgr.createOne(configId, oldValue, encyptStr);
 
         //
         // 发送邮件通知
@@ -425,8 +461,10 @@ public class ConfigMgrImpl implements ConfigMgr {
         String toEmails = appMgr.getEmails(config.getAppId());
 
         if (applicationPropertyConfig.isEmailMonitorOn()) {
+        	// 发送邮件之前还原成原文而不是密文显示到邮件上 Dimmacro 2016年11月11日16:36:59
+        	config.setValue(CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
             boolean isSendSuccess = logMailBean.sendHtmlEmail(toEmails,
-                    " config update", DiffUtils.getDiff(CodeUtils.unicodeToUtf8(oldValue),
+                    " config update", DiffUtils.getDiff(CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(oldValue)),
                             value,
                             config.toString(),
                             getConfigUrlHtml(config)));
@@ -505,32 +543,61 @@ public class ConfigMgrImpl implements ConfigMgr {
     @Override
     public void newConfig(ConfNewItemForm confNewForm, DisConfigTypeEnum disConfigTypeEnum) {
 
-        Config config = new Config();
-
-        config.setAppId(confNewForm.getAppId());
-        config.setEnvId(confNewForm.getEnvId());
-        config.setName(confNewForm.getKey());
-        config.setType(disConfigTypeEnum.getType());
-        config.setVersion(confNewForm.getVersion());
-        config.setValue(CodeUtils.utf8ToUnicode(confNewForm.getValue()));
-        config.setStatus(Constants.STATUS_NORMAL);
-
-        // 时间
-        String curTime = DateUtils.format(new Date(), DataFormatConstants.COMMON_TIME_FORMAT);
-        config.setCreateTime(curTime);
-        config.setUpdateTime(curTime);
+        Config config = buildNewConfig(confNewForm, disConfigTypeEnum);
 
         configDao.create(config);
+        
+        // 插入的时候判断如果是普通用户,且插入的是local环境，则同时往其他环境也做插入
+        if(UserEnum.isNormalUser(config.getUserId()) && EnvEnum.isLocalEnv(config.getEnvId())){
+        	Config testConfig = buildNewConfig(confNewForm, disConfigTypeEnum);
+        	testConfig.setEnvId(EnvEnum.TEST.getValue());testConfig.setUserId(UserEnum.TEST.getValue());
+        	configDao.create(testConfig);
+        	Config previewConfig = buildNewConfig(confNewForm, disConfigTypeEnum);
+        	previewConfig.setEnvId(EnvEnum.PREVIEW.getValue());previewConfig.setUserId(UserEnum.OPERATION.getValue());
+        	configDao.create(previewConfig);
+        	Config onlineConfig = buildNewConfig(confNewForm, disConfigTypeEnum);
+        	onlineConfig.setEnvId(EnvEnum.ONLINE.getValue());onlineConfig.setUserId(UserEnum.OPERATION.getValue());
+        	configDao.create(onlineConfig);
+        }
+        	
         configHistoryMgr.createOne(config.getId(), "", config.getValue());
 
         // 发送邮件通知
         //
         String toEmails = appMgr.getEmails(config.getAppId());
         if (applicationPropertyConfig.isEmailMonitorOn() == true) {
+        	// 发送邮件之前还原成原文而不是密文显示到邮件上 Dimmacro 2016年11月11日16:36:59
+        	config.setValue(CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
             logMailBean.sendHtmlEmail(toEmails, " config new", getNewValue(confNewForm.getValue(), config.toString(),
                     getConfigUrlHtml(config)));
         }
     }
+
+	private Config buildNewConfig(ConfNewItemForm confNewForm, DisConfigTypeEnum disConfigTypeEnum) {
+		Config config = new Config();
+
+        config.setAppId(confNewForm.getAppId());
+        config.setEnvId(confNewForm.getEnvId());
+        config.setName(confNewForm.getKey());
+        config.setType(disConfigTypeEnum.getType());
+        config.setVersion(confNewForm.getVersion());
+        config.setValue(DataSecurityUtil.encryptAES(CodeUtils.utf8ToUnicode(confNewForm.getValue()))); // 增加内容加密 Dimmacro
+        config.setStatus(Constants.STATUS_NORMAL);
+        
+        // 增加config所属的用户 Dimmacro 2016年11月9日17:17:45
+        Visitor visitor = ThreadContext.getSessionVisitor();
+        if (visitor == null) {
+            LOG.warn("No session visitor!");
+            throw new AccessDeniedException("No session visitor! ");
+        }
+        config.setUserId(visitor.getLoginUserId());
+
+        // 时间
+        String curTime = DateUtils.format(new Date(), DataFormatConstants.COMMON_TIME_FORMAT);
+        config.setCreateTime(curTime);
+        config.setUpdateTime(curTime);
+		return config;
+	}
 
     /**
      * 删除配置

@@ -12,7 +12,7 @@
                             <a href="/configUsage.html" >配置部署详情</a>
                         </li>
                         <li class="">
-                            <a href="https://github.com/knightliao/disconf" target="_blank">帮助</a>
+                            <a href="https://github.com/ledotcom/disconf" target="_blank">帮助</a>
                         </li>
                     </ul>
                 </div>

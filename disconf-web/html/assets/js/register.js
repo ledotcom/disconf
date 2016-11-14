@@ -25,7 +25,7 @@ $("#item_submit").on("click", function (e) {
             alert(data.result);
             window.location.href = "/login.html";
         } else {
-            $("#error").html(data.result);
+            $("#error").html(data.result).show();
         }
     });
 });

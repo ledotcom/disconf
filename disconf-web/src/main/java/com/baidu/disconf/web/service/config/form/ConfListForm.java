@@ -26,6 +26,16 @@ public class ConfListForm extends RequestListBase {
 
     @NotNull
     private Long envId;
+    
+    private Long userId;
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
 	public Long getAppId() {
 		return appId;
@@ -51,4 +61,8 @@ public class ConfListForm extends RequestListBase {
 		this.envId = envId;
 	}
 
+	@Override
+	public String toString() {
+		return "ConfListForm [appId=" + appId + ", envId=" + envId + ", userId=" + userId + ", version=" + version + "]";
+	}
 }

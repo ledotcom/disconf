@@ -3,6 +3,11 @@ package com.baidu.disconf.web.service.config.utils;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.baidu.disconf.web.utils.CodeUtils;
+
 /**
  * 
  * @Description:文件内容加密工具类
@@ -14,10 +19,17 @@ public class DataSecurityUtil {
 	private static final String KEY_ALGORITHM = "AES";
 	private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
 	private static final String DEFAULT_CHARSET = "utf-8";
-	private transient static final String MAGIC_LEMALL_ENCRYKEY = "_magic_lemall_";
+	private transient static final String MAGIC_LEMALL_ENCRYKEY = "111";
+	
+	protected static final Logger LOG = LoggerFactory.getLogger(DataSecurityUtil.class);
 
-	public static String encryptAES(String sourceStr) throws Exception {
-		return bytes2hex(encryptAES(sourceStr, MAGIC_LEMALL_ENCRYKEY));
+	public static String encryptAES(String sourceStr){
+		try {
+			return bytes2hex(encryptAES(sourceStr, MAGIC_LEMALL_ENCRYKEY));
+		} catch (Exception e) {
+			LOG.error("加密过程失败，将返回原文信息",e);
+			return sourceStr;
+		}
 	}
 
 	private static byte[] encryptAES(String sourceStr, String encryKey) throws Exception {
@@ -34,8 +46,13 @@ public class DataSecurityUtil {
 		return cipher.doFinal(sourceStr.getBytes(DEFAULT_CHARSET));
 	}
 
-	public static String decryptAES(String cypherText) throws Exception {
-		return new String(decryptAES(hex2bytes(cypherText), MAGIC_LEMALL_ENCRYKEY), DEFAULT_CHARSET);
+	public static String decryptAES(String cypherText){
+		try {
+			return new String(decryptAES(hex2bytes(cypherText), MAGIC_LEMALL_ENCRYKEY), DEFAULT_CHARSET);
+		}catch (Exception e) {
+			LOG.error("解密过程失败，将返回原文",e);
+			return cypherText;
+		}
 	}
 
 	private static byte[] decryptAES(byte[] srcBytes, String decryptKey) throws Exception {
@@ -134,14 +151,19 @@ public class DataSecurityUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String s = "邓宏abc123邓宏abc123";
+		/*String s = "邓宏abc123邓宏abc123";
 		byte[] bb = encryptAES(s, MAGIC_LEMALL_ENCRYKEY);
 		String code = bytes2hex(bb);
 		System.out.println(code);
 		System.out.println(new String(decryptAES(hex2bytes(code), MAGIC_LEMALL_ENCRYKEY)));
 		s = encryptAES(s);
 		System.out.println(s);
-		System.out.println(decryptAES(s));
+		System.out.println(decryptAES(s));*/
+		String string = "690E7F5F25C71108DDF4E735F1D5DA83679C036F6F6CB996DC57B2518AB02240";
+		string = decryptAES(string);
+		System.out.println(string);
+		string = CodeUtils.unicodeToUtf8(string);
+		System.out.println(string);
 
 	}
 }

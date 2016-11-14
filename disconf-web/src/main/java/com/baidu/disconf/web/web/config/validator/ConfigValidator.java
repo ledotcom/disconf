@@ -14,8 +14,10 @@ import com.baidu.disconf.web.service.config.service.ConfigFetchMgr;
 import com.baidu.disconf.web.service.config.service.ConfigMgr;
 import com.baidu.disconf.web.service.env.bo.Env;
 import com.baidu.disconf.web.service.env.service.EnvMgr;
+import com.baidu.disconf.web.service.user.dto.Visitor;
 import com.baidu.disconf.web.service.user.service.AuthMgr;
 import com.baidu.dsp.common.exception.FieldException;
+import com.baidu.ub.common.commons.ThreadContext;
 
 /**
  * @author liaoqiqi
@@ -60,6 +62,8 @@ public class ConfigValidator {
         // validate app
         //
         validateAppAuth(config.getAppId());
+        
+        // 验证当前config的userid是否与
 
         return config;
     }
@@ -182,7 +186,9 @@ public class ConfigValidator {
         //
         // key
         //
-        Config config = configFetchMgr.getConfByParameter(app.getId(), env.getId(), confNewForm.getVersion(),
+        Visitor visitor = ThreadContext.getSessionVisitor();
+        
+        Config config = configFetchMgr.getConfByParameter(app.getId(), env.getId(), visitor.getLoginUserId(),confNewForm.getVersion(),
                 confNewForm.getKey(), disConfigTypeEnum);
         if (config != null) {
             throw new FieldException(ConfNewItemForm.KEY, "key.exist", null);

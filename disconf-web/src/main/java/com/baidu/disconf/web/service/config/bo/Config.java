@@ -16,7 +16,15 @@ import lombok.Data;
 @Table(db = DB.DB_NAME, name = "config", keyColumn = Columns.CONFIG_ID)
 public class Config extends BaseObject<Long> {
 
-    public Integer getType() {
+    public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public Integer getType() {
 		return type;
 	}
 
@@ -126,6 +134,12 @@ public class Config extends BaseObject<Long> {
      */
     @Column(value = Columns.ENV_ID)
     private Long envId;
+    
+    /**
+    *
+    */
+   @Column(value = Columns.USER_ID)
+   private Long userId;
 
     /**
      * 创建时间

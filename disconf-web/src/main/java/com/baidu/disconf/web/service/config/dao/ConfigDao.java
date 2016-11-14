@@ -23,7 +23,9 @@ public interface ConfigDao extends BaseDao<Long, Config> {
      *
      * @return
      */
-    Config getByParameter(Long appId, Long envId, String version, String key, DisConfigTypeEnum disConfigTypeEnum);
+	Config getByParameter(Long appId, Long envId, String version, String key, DisConfigTypeEnum disConfigTypeEnum);
+
+	Config getByParameter(Long appId, Long envId, Long userId,String version, String key, DisConfigTypeEnum disConfigTypeEnum);
 
     /**
      * @param
@@ -39,7 +41,7 @@ public interface ConfigDao extends BaseDao<Long, Config> {
      *
      * @return
      */
-    DaoPageResult<Config> getConfigList(Long appId, Long envId, String version, Page page);
+    DaoPageResult<Config> getConfigList(Long appId, Long envId, Long userId,String version, Page page);
 
     /**
      * @param configId
@@ -60,7 +62,7 @@ public interface ConfigDao extends BaseDao<Long, Config> {
      * @param hasValue
      * @return
      */
-    List<Config> getConfigList(Long appId, Long envId, String version, Boolean hasValue);
+    List<Config> getConfigList(Long appId, Long envId,Long userId, String version, Boolean hasValue);
 
 
     /**

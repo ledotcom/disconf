@@ -10,6 +10,7 @@ import com.baidu.disconf.core.common.constants.DisConfigTypeEnum;
 import com.baidu.disconf.web.common.Constants;
 import com.baidu.disconf.web.service.config.bo.Config;
 import com.baidu.disconf.web.service.config.dao.ConfigDao;
+import com.baidu.disconf.web.service.user.bo.UserEnum;
 import com.baidu.dsp.common.constant.DataFormatConstants;
 import com.baidu.dsp.common.dao.AbstractDao;
 import com.baidu.dsp.common.dao.Columns;
@@ -40,6 +41,15 @@ public class ConfigDaoImpl extends AbstractDao<Long, Config> implements ConfigDa
                 new Match(Columns.VERSION, version), new Match(Columns.TYPE, disConfigTypeEnum.getType()),
                 new Match(Columns.NAME, key), new Match(Columns.STATUS, Constants.STATUS_NORMAL));
     }
+    
+    @Override
+    public Config getByParameter(Long appId, Long envId, Long userId,String version, String key,
+                                 DisConfigTypeEnum disConfigTypeEnum) {
+
+        return findOne(new Match(Columns.APP_ID, appId), new Match(Columns.ENV_ID, envId),new Match(Columns.USER_ID, userId),
+                new Match(Columns.VERSION, version), new Match(Columns.TYPE, disConfigTypeEnum.getType()),
+                new Match(Columns.NAME, key), new Match(Columns.STATUS, Constants.STATUS_NORMAL));
+    }
 
     /**
      *
@@ -60,7 +70,7 @@ public class ConfigDaoImpl extends AbstractDao<Long, Config> implements ConfigDa
      *
      */
     @Override
-    public DaoPageResult<Config> getConfigList(Long appId, Long envId, String version, Page page) {
+    public DaoPageResult<Config> getConfigList(Long appId, Long envId, Long userId,String version, Page page) {
 
         DaoPage daoPage = DaoUtils.daoPageAdapter(page);
         List<Match> matchs = new ArrayList<Match>();
@@ -68,7 +78,11 @@ public class ConfigDaoImpl extends AbstractDao<Long, Config> implements ConfigDa
         matchs.add(new Match(Columns.APP_ID, appId));
 
         matchs.add(new Match(Columns.ENV_ID, envId));
-
+        
+        if(!UserEnum.isAdmin(userId)){
+        	matchs.add(new Match(Columns.USER_ID,userId));
+        }
+        
         matchs.add(new Match(Columns.VERSION, version));
 
         matchs.add(new Match(Columns.STATUS, Constants.STATUS_NORMAL));
@@ -80,12 +94,15 @@ public class ConfigDaoImpl extends AbstractDao<Long, Config> implements ConfigDa
      *
      */
     @Override
-    public List<Config> getConfigList(Long appId, Long envId, String version, Boolean hasValue) {
+    public List<Config> getConfigList(Long appId, Long envId,  Long userId,String version, Boolean hasValue) {
 
         List<Match> matchs = new ArrayList<Match>();
         matchs.add(new Match(Columns.APP_ID, appId));
         matchs.add(new Match(Columns.ENV_ID, envId));
         matchs.add(new Match(Columns.VERSION, version));
+        if(!UserEnum.isAdmin(userId)){
+        	matchs.add(new Match(Columns.USER_ID,userId));
+        }
         matchs.add(new Match(Columns.STATUS, Constants.STATUS_NORMAL));
         if (hasValue) {
             return find(matchs, new ArrayList<Order>());

@@ -20,6 +20,10 @@ import com.baidu.disconf.web.service.config.bo.Config;
 import com.baidu.disconf.web.service.config.form.ConfForm;
 import com.baidu.disconf.web.service.config.service.ConfigFetchMgr;
 import com.baidu.disconf.web.service.config.utils.ConfigUtils;
+import com.baidu.disconf.web.service.config.utils.DataSecurityUtil;
+import com.baidu.disconf.web.service.user.bo.UserEnum;
+import com.baidu.disconf.web.service.user.dto.Visitor;
+import com.baidu.disconf.web.utils.CodeUtils;
 import com.baidu.disconf.web.web.config.dto.ConfigFullModel;
 import com.baidu.disconf.web.web.config.validator.ConfigValidator;
 import com.baidu.disconf.web.web.config.validator.ConfigValidator4Fetch;
@@ -28,6 +32,7 @@ import com.baidu.dsp.common.constant.WebConstants;
 import com.baidu.dsp.common.controller.BaseController;
 import com.baidu.dsp.common.exception.DocumentNotFoundException;
 import com.baidu.dsp.common.vo.JsonObjectBase;
+import com.baidu.ub.common.commons.ThreadContext;
 
 /**
  * 配置获取Controller, Disconf-client专门使用的
@@ -95,8 +100,8 @@ public class ConfigFetcherController extends BaseController {
             LOG.warn(e.toString());
             return ConfigUtils.getErrorVo(e.getMessage());
         }
-
-        return configFetchMgr.getConfItemByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),
+        
+        return configFetchMgr.getConfItemByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),UserEnum.READ_ADMIN.getValue(),
                 configModel.getVersion(), configModel.getKey());
     }
 
@@ -127,7 +132,7 @@ public class ConfigFetcherController extends BaseController {
             try {
                 //
                 Config config = configFetchMgr
-                        .getConfByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),
+                        .getConfByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),UserEnum.READ_ADMIN.getValue(),
                                 configModel.getVersion(), configModel.getKey(),
                                 DisConfigTypeEnum.FILE);
                 if (config == null) {
@@ -135,7 +140,8 @@ public class ConfigFetcherController extends BaseController {
                     throw new DocumentNotFoundException(configModel.getKey());
                 }
                 //API获取节点内容也需要同样做格式转换
-                return downloadDspBill(configModel.getKey(), config.getValue());
+                // 处理解码问题 dimmacro 2016年11月11日12:07:24
+                return downloadDspBill(configModel.getKey(), CodeUtils.unicodeToUtf8(DataSecurityUtil.decryptAES(config.getValue())));
 
             } catch (Exception e) {
                 LOG.error(e.toString());
@@ -181,9 +187,9 @@ public class ConfigFetcherController extends BaseController {
         // 校验
         //
         ConfigFullModel configModel = configValidator4Fetch.verifyConfForm(confForm, true);
-
+        
         List<Config> configs =
-                configFetchMgr.getConfListByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),
+                configFetchMgr.getConfListByParameter(configModel.getApp().getId(), configModel.getEnv().getId(),UserEnum.READ_ADMIN.getValue(),
                         configModel.getVersion(), hasValue);
 
         return buildListSuccess(configs, configs.size());

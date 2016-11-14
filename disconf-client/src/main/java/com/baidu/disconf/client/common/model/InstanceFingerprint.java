@@ -8,39 +8,44 @@ package com.baidu.disconf.client.common.model;
  */
 public class InstanceFingerprint {
 
-    // 本实例所在机器的IP
-    private String host = "";
+    // 本实例应用名及所在机器的IP
+    private String appName = "";
 
-    // 可以表示本实例的PORT
-    private int port = 0;
+    // 可以表示本实例的pid
+    private int pid = 0;
 
     // 一个实例固定的UUID
     private String uuid = "";
 
-    public String getHost() {
-        return host;
-    }
-
-    public InstanceFingerprint(String host, int port, String uuid) {
+    public InstanceFingerprint(String appName, int pid, String uuid) {
         super();
-        this.host = host;
-        this.port = port;
+        this.appName = appName;
+        this.pid = pid;
         this.uuid = uuid;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
 
-    public int getPort() {
-        return port;
-    }
+    public String getAppName() {
+		return appName;
+	}
 
-    public void setPort(int port) {
-        this.port = port;
-    }
 
-    public String getUuid() {
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+
+	public int getPid() {
+		return pid;
+	}
+
+
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
+
+
+	public String getUuid() {
         return uuid;
     }
 
@@ -50,7 +55,7 @@ public class InstanceFingerprint {
 
     @Override
     public String toString() {
-        return "InstanceFingerprint [host=" + host + ", port=" + port + "]";
+        return "InstanceFingerprint [appName=" + appName + ", pid=" + pid + "]";
     }
 
 }

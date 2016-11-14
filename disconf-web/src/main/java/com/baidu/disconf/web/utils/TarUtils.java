@@ -40,7 +40,7 @@ public class TarUtils {
         String curTime = DateUtils.format(new Date(), DataFormatConstants.COMMON_TIME_FORMAT);
 
         // 文件名
-        String outputFilePath = fileNamePrefix + "_" + curTime + ".tar.gz";
+        String outputFilePath = fileNamePrefix + "_" + curTime + ".tar";
         File outputFile = new File(dir, outputFilePath);
 
         FileOutputStream out = null;

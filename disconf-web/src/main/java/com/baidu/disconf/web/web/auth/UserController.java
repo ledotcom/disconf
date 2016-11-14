@@ -179,8 +179,9 @@ public class UserController extends BaseController {
         user.setPassword(SignUtils.createPassword(regPwd));
         user.setToken(SignUtils.createToken(regUserName));
         user.setOwnApps("0");
-        //此处给管理员的权限,就是为了admin中心权限,下方到各个部门权限
-        user.setRoleId(RoleEnum.ADMIN.getValue());
+        //此处给管理员的权限,就是为了admin中心权限,下方到各个部门权限  
+        // 改为普通用户权限 Dimmacro 2016年11月9日14:42:19,普通用户只能修改查看自己创建的app及项
+        user.setRoleId(RoleEnum.NORMAL.getValue());
 
         userMgr.create(user);
 

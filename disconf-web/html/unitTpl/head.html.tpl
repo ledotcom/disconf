@@ -29,7 +29,7 @@
 
                         <span class="span2"> </span>
                         <form class="navbar-form pull-left">
-                            <button class="btn btn-warning" title="GitHub" type="button" style=""  onclick="window.open('https://github.com/knightliao/disconf', '_blank');">
+                            <button class="btn btn-warning" title="GitHub" type="button" style=""  onclick="window.open('https://github.com/ledotcom/disconf', '_blank');">
                                 <i class="icon-circle-arrow-up  icon-white"></i> <b>GitHub</b>
                             </button>
                         </form>

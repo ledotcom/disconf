@@ -9,11 +9,8 @@
                         <a href="#" class="dark">升级</a> &nbsp; 
                     </strong>
                     <div class="sep10"></div>
-                    <span>分布式配置管理平台</span>
-                    <div class="sep10"></div>
-                    <span class="myfade">Theme by <a href="http://sov5.com/" target="_blank">Sov5搜索</a>，
-                        Power by 百度程序化广告交易工程平台技术部，
-                    Copyright &copy; 2014~2016 </span>
+                   <span>乐视商城-分布式配置管理平台</span>
+            		<div class="sep10"></div>          
                 </div>
             </div>
         </div>
