@@ -22,7 +22,6 @@ import com.baidu.disconf.web.service.config.service.ConfigFetchMgr;
 import com.baidu.disconf.web.service.config.utils.ConfigUtils;
 import com.baidu.disconf.web.service.config.utils.DataSecurityUtil;
 import com.baidu.disconf.web.service.user.bo.UserEnum;
-import com.baidu.disconf.web.service.user.dto.Visitor;
 import com.baidu.disconf.web.utils.CodeUtils;
 import com.baidu.disconf.web.web.config.dto.ConfigFullModel;
 import com.baidu.disconf.web.web.config.validator.ConfigValidator;
@@ -32,7 +31,6 @@ import com.baidu.dsp.common.constant.WebConstants;
 import com.baidu.dsp.common.controller.BaseController;
 import com.baidu.dsp.common.exception.DocumentNotFoundException;
 import com.baidu.dsp.common.vo.JsonObjectBase;
-import com.baidu.ub.common.commons.ThreadContext;
 
 /**
  * 配置获取Controller, Disconf-client专门使用的

@@ -6,8 +6,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.baidu.disconf.web.utils.CodeUtils;
-
 /**
  * 
  * @Description:文件内容加密工具类
@@ -148,22 +146,5 @@ public class DataSecurityUtil {
 		default:
 			return 0x00;
 		}
-	}
-
-	public static void main(String[] args) throws Exception {
-		/*String s = "邓宏abc123邓宏abc123";
-		byte[] bb = encryptAES(s, MAGIC_LEMALL_ENCRYKEY);
-		String code = bytes2hex(bb);
-		System.out.println(code);
-		System.out.println(new String(decryptAES(hex2bytes(code), MAGIC_LEMALL_ENCRYKEY)));
-		s = encryptAES(s);
-		System.out.println(s);
-		System.out.println(decryptAES(s));*/
-		String string = "690E7F5F25C71108DDF4E735F1D5DA83679C036F6F6CB996DC57B2518AB02240";
-		string = decryptAES(string);
-		System.out.println(string);
-		string = CodeUtils.unicodeToUtf8(string);
-		System.out.println(string);
-
 	}
 }
