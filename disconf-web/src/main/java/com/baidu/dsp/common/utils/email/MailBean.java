@@ -40,7 +40,7 @@ public class MailBean implements InitializingBean {
      * @throws AddressException
      */
     public void sendHtmlMail(String from, String[] to, String title, String text)
-            throws AddressException, MessagingException {
+            throws Exception {
     	try {
     		 long start = System.currentTimeMillis();
 
@@ -62,6 +62,7 @@ public class MailBean implements InitializingBean {
     	        LOG.info("send mail start:" + start + " end :" + end);
 		} catch (Exception e) {
 			LOG.error("发现邮件失败:from "+from+",to "+StringUtils.join(to, ";"),e);
+			throw e;
 		}
        
     }

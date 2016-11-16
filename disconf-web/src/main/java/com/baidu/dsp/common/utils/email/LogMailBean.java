@@ -3,6 +3,7 @@ package com.baidu.dsp.common.utils.email;
 import com.baidu.disconf.web.config.ApplicationPropertyConfig;
 import com.baidu.disconf.web.service.user.dto.Visitor;
 import com.baidu.ub.common.commons.ThreadContext;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liaoqiqi
@@ -27,6 +30,8 @@ public class LogMailBean {
     protected static final Logger LOG = LoggerFactory.getLogger(LogMailBean.class);
 
     private final ExecutorService service = Executors.newFixedThreadPool(10);
+    
+    private static final long sendMailMaxWaitTime = 3000;
 
     /**
      * 发送报警邮件中标题的最大长度，255
@@ -163,13 +168,14 @@ public class LogMailBean {
 
             try {
                 final String finalMailTitle = mailTitle;
-                service.submit(new Callable<Object>() {
+                Future<Object> future = service.submit(new Callable<Object>() {
                     @Override
                     public Object call() throws Exception {
                         mailBean.sendHtmlMail(mailFrom, mailToList, finalMailTitle, content);
                         return null;
                     }
                 });
+                future.get(sendMailMaxWaitTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 LOG.error("When send alarm mail,we can't send it", e);
                 return false;
