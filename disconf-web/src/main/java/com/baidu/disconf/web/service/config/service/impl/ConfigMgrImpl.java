@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baidu.disconf.core.common.constants.DisConfigTypeEnum;
+import com.baidu.disconf.core.common.utils.MockBase64Utils;
 import com.baidu.disconf.web.common.Constants;
 import com.baidu.disconf.web.config.ApplicationPropertyConfig;
 import com.baidu.disconf.web.innerapi.zookeeper.ZooKeeperDriver;
@@ -514,17 +515,18 @@ public class ConfigMgrImpl implements ConfigMgr {
     public void notifyZookeeper(Long configId) {
 
         ConfListVo confListVo = getConfVo(configId);
+        
+        // 将发送到zk上的数据进行Base64加密 Dimmacro 2016年11月16日14:01:34
 
         if (confListVo.getTypeId().equals(DisConfigTypeEnum.FILE.getType())) {
 
             zooKeeperDriver.notifyNodeUpdate(confListVo.getAppName(), confListVo.getEnvName(), confListVo.getVersion(),
-                    confListVo.getKey(), GsonUtils.toJson(confListVo.getValue()),
+                    confListVo.getKey(), MockBase64Utils.encode(GsonUtils.toJson(confListVo.getValue())),
                     DisConfigTypeEnum.FILE);
-
         } else {
 
             zooKeeperDriver.notifyNodeUpdate(confListVo.getAppName(), confListVo.getEnvName(), confListVo.getVersion(),
-                    confListVo.getKey(), confListVo.getValue(), DisConfigTypeEnum.ITEM);
+                    confListVo.getKey(), MockBase64Utils.encode(confListVo.getValue()), DisConfigTypeEnum.ITEM);
         }
 
     }

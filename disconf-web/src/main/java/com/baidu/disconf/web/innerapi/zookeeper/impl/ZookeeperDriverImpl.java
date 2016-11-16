@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.baidu.disconf.core.common.constants.DisConfigTypeEnum;
 import com.baidu.disconf.core.common.path.ZooPathMgr;
+import com.baidu.disconf.core.common.utils.MockBase64Utils;
 import com.baidu.disconf.core.common.zookeeper.ZookeeperMgr;
 import com.baidu.disconf.web.innerapi.zookeeper.ZooKeeperDriver;
 import com.baidu.disconf.web.service.zookeeper.config.ZooConfig;
@@ -224,7 +225,8 @@ public class ZookeeperDriverImpl implements ZooKeeperDriver, InitializingBean, D
             // value
             byte[] data = zooKeeper.getData(thirdPath, null, null);
             if (data != null) {
-                zkDisconfDataItem.setValue(new String(data, CHARSET));
+            	// 读取zk数据的时候将类Base64的密文还原成原文 Dimmacro 2016年11月16日14:14:53
+                zkDisconfDataItem.setValue(MockBase64Utils.decode(new String(data, CHARSET)));
             }
 
             // add

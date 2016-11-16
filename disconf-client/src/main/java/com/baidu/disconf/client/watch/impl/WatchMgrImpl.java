@@ -12,6 +12,7 @@ import com.baidu.disconf.client.watch.inner.DisconfSysUpdateCallback;
 import com.baidu.disconf.client.watch.inner.NodeWatcher;
 import com.baidu.disconf.core.common.constants.DisConfigTypeEnum;
 import com.baidu.disconf.core.common.path.ZooPathMgr;
+import com.baidu.disconf.core.common.utils.MockBase64Utils;
 import com.baidu.disconf.core.common.utils.ZooUtils;
 import com.baidu.disconf.core.common.zookeeper.ZookeeperMgr;
 
@@ -108,6 +109,8 @@ public class WatchMgrImpl implements WatchMgr {
 
         String mainTypeFullStr = path + "/" + finerPrint;
         try {
+        	// Dimmacro 2016年11月15日17:49:37 zookeeper中放置类Base64的加密的代码
+        	data = MockBase64Utils.encode(data);
             ZookeeperMgr.getInstance().createEphemeralNode(mainTypeFullStr, data, CreateMode.EPHEMERAL);
         } catch (Exception e) {
             LOGGER.error("cannot create: " + mainTypeFullStr + "\t" + e.toString());
