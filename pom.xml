@@ -26,8 +26,8 @@
 
     <properties>
         <!-- 模块版本号 -->
-        <disconf-core.version>2.6.36</disconf-core.version>
-        <disconf-client.version>2.6.36</disconf-client.version>
+        <disconf-core.version>2.6.36.1</disconf-core.version>
+        <disconf-client.version>2.6.36.1</disconf-client.version>
         <disconf-client-spring.version>2.6.36</disconf-client-spring.version>
 
         <!-- Spring項目配置 -->
